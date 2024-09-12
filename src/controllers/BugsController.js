@@ -1,6 +1,8 @@
 import { Auth0Provider } from "@bcwdev/auth0provider";
 import BaseController from "../utils/BaseController.js";
 import { bugsService } from "../services/BugsService.js";
+import { notesService } from "../services/NotesService.js";
+import { trackedBugsService } from "../services/TrackedBugsService.js";
 
 export class BugsController extends BaseController {
   constructor() {
@@ -8,20 +10,21 @@ export class BugsController extends BaseController {
     this.router
       .get('', this.getAllBugs)
       .get('/:bugId', this.getBugById)
+      .get('/:bugId/notes', this.getNotesByBugId)
+      .get('/:bugId/trackedbugs', this.getTrackersByBugId)
       .use(Auth0Provider.getAuthorizedUserInfo)
       .post('', this.createBug)
       .put('/:bugId', this.updateBug)
       .delete('/:bugId', this.deleteBug)
   }
-  async updateBug(request, response, next) {
+
+  async getNotesByBugId(request, response, next) {
     try {
-      const updateData = response.body
-      const bugId = response.params.bugId
-      const user = response.userinfo
-      const bugToUpdate = await bugsService.updateBug(updateData, bugId, user.id)
-      response.send(bugToUpdate)
-    } catch (error) {
-      next(error)
+      const bugId = request.params.bugId;
+      const notes = await notesService.getNotesByBugId(bugId);
+      response.send(notes)
+    } catch (e) {
+      next(e)
     }
   }
 
@@ -44,6 +47,16 @@ export class BugsController extends BaseController {
     }
   }
 
+  async getTrackersByBugId(request, response, next) {
+    try {
+      const bugId = request.params.bugId;
+      const trackers = await trackedBugsService.getTrackersByBugId(bugId);
+      response.send(trackers);
+    } catch (e) {
+      next(e)
+    }
+  }
+
   async createBug(request, response, next) {
     try {
       const bugData = request.body;
@@ -52,6 +65,18 @@ export class BugsController extends BaseController {
       response.send(createdBug)
     } catch (e) {
       next(e)
+    }
+  }
+
+  async updateBug(request, response, next) {
+    try {
+      const updateData = request.body
+      const bugId = request.params.bugId
+      const user = request.userInfo
+      const bugToUpdate = await bugsService.updateBug(updateData, bugId, user.id)
+      response.send(bugToUpdate)
+    } catch (error) {
+      next(error)
     }
   }
 

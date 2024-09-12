@@ -13,8 +13,7 @@ TrackedBugSchema.virtual(`tracker`,
   {
     localField: `accountId`,
     ref: `Account`,
-    foreignField: `_id`,
-    justOne: true
+    foreignField: `_id`
   }
 )
 
