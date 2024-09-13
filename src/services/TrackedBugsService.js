@@ -1,6 +1,21 @@
 import { dbContext } from "../db/DbContext.js";
+import { Forbidden } from "../utils/Errors.js";
 
 class TrackedBugsService {
+  async deleteTrackedBug(trackedBugId, userId) {
+    const bugToDelete = await dbContext.TrackedBug.findById(trackedBugId);
+    if (bugToDelete.accountId != userId) {
+      throw new Forbidden("No");
+    }
+
+    await bugToDelete.deleteOne();
+    return 'All gone'
+  }
+
+  async getBugsUserIsTracking(userId) {
+    const bugs = await dbContext.TrackedBug.find({ accountId: userId }).populate('bug');
+    return bugs;
+  }
 
 
   async createTrackedBug(tBugData) {
@@ -14,6 +29,8 @@ class TrackedBugsService {
     const tBug = await dbContext.TrackedBug.find({ bugId: bugId }).populate('tracker');
     return tBug;
   }
+
+
 }
 
 export const trackedBugsService = new TrackedBugsService();
