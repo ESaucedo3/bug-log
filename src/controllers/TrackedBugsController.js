@@ -26,7 +26,10 @@ export class TrackedBugsController extends BaseController {
 
   async deleteTrackedBug(request, response, next) {
     try {
-
+      const user = request.userInfo;
+      const trackedBugId = request.params.trackedBugId;
+      const message = await trackedBugsService.deleteTrackedBug(trackedBugId, user.id);
+      response.send(message)
     } catch (error) {
       next(error);
     }
